@@ -1,5 +1,56 @@
 #开发者指南
 
+##重要提示
+	扩展板上的按键不要按！
+原因：由于Arduino Uno R3 只有一个串口，向板子里下载程序要用此串口。微信硬件蓝牙模块也要用串口和arduino通信，假如模块也使用此串口的话，就会出现一个问题，当模块插在板子上时，就无法下载程序。然后咱就使用软串口SoftSerial与模块通信，由于扩展板是采购的，相关硬件限制，只好把SoftSerial的两根线接到了按键上。按按键将会影响微信与arduino板的通信
+
+##体验步骤
+1. 用 USB 线为 Arduino 板子供电
+2. 微信扫描随机附赠卡片上的二维码绑定设备
+3. 打开 SENSORO 微信公众号，进入IOT页面
+4. 当设备连接成功后，语音输入命令
+5. 开发者套件响应命令
+
+#####已支持的命令：
+蓝色、红色、绿色、变、闪、熄灭。     
+转、加速、减速、停。
+
+  
+##开始动手
+####相关资源
+ * Arduino 官网 http://arduino.cc/
+ * Arduino 中文社区 http://www.arduino.cn/
+ * Arduino IDE链接 http://arduino.cc/en/Main/Software
+
+####如何开发
+1. 打开 IDE
+2. 打开 DEMO 工程 wechat\wechat_hardware\wechat_hardware.ino
+3. 导入库：项目-->导入库-->添加库-->添加wechat\lib下的各个压缩包。
+4. 添加指令：查找需要添加的中文指令的GB2312码，添加到宏定义处。  
+（提示：直接用微信公众号说指令，页面上会有相应的GB2312码）
+		
+		//Cmd, which is the GB2312 codes of the Chinese character
+		#define GB_XIMIE      "CFA8C3F0"
+		#define GB_LANSE      "C0B6C9AB"
+		...
+5. 添加相应的指令解析执行代码
+			
+		...
+	    if(!memcmp(cmd.data,GB_XIMIE,cmd.len)){
+	      flag_rgb_blink=false;
+	      flag_rgb_rainbow=false;
+	      rgbLed.setColorRGB(0,0,0);
+	    }
+	    else if(!memcmp(cmd.data,GB_LANSE,cmd.len)){
+	      flag_rgb_blink=false;
+	      flag_rgb_rainbow=false;
+	      rgbLed.setColorRGB(0,0,255);
+	    }
+	    ...
+6. 验证、上传代码
+7. 测试
+
+
 ##工作原理
 
 我们的开发者套件主要由 3 部分组成：SMART TAG + Arduino + SENSORO IOT 体验板。同时 SENSORO 微信公众号iot页面中会提供对开发者套件的操作界面，包括绑定设备、连接设备、断开设备、语音输入操作指令。
