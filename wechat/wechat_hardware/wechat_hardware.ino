@@ -4,11 +4,12 @@
  */
 
 #include <SoftwareSerial.h>
-#include "CmdFifoQueue.h"
 #include "Moto.h"
 #include "RGBLED.h"
 #include "DHT11.h"
 
+#define CMD_GB2312_CODE_MAX_LEN  32
+#define CMD_REC_TIME_OUT         2000
 //Cmd, which is the GB2312 codes of the Chinese character
 #define GB_LANSE      "C0B6C9AB"
 #define GB_HONGSE     "BAECC9AB"
@@ -36,9 +37,6 @@ Add your own cmd gb2312 code here
 #define SOFTSERIAL_RX   6
 #define SOFTSERIAL_TX   7
 
-//New a cmd queue with size 8,the cmdQueue may more proper when using hardware Serial
-//When using SoftwareSerial, it's ok ,but someting like "ji lei"
-CmdFifoQueue cmdFifoQue(8);
 //New a RGB led
 RGBLED  rgbLed(RGB_SCL,RGB_SDA);
 //New a moto
@@ -54,97 +52,92 @@ unsigned long previousMillis = 0;
 
 void setup() {
   //hardware Serial 
-
-//  Serial.begin(38400);
-//  while(!Serial);
-
-//SoftwareSerial
+  Serial.begin(38400);
+  while(!Serial);
+ //SoftwareSerial
   mySerial.begin(38400);
-//  Serial.println("start");
+  Serial.println("start");
   rgbLed.begin();
   moto.begin();
 }
 void loop() {
   
-//SoftwareSerial receive the cmd and put in queue
+ //SoftwareSerial receive the cmd 
   if (mySerial.available())
   {
      int len=0;
-     char buffer[32];
-     do{
-      buffer[len++]=mySerial.read();
-     }while(mySerial.available());
-      Cmd cmd;
-      cmd.len = len;
-      memcpy(cmd.data,buffer,len);
-//      Serial.write(cmd.data,cmd.len);
-      //Put cmd into the cmd queue
-      cmdFifoQue.cmdFifoPut(&cmd);
-  }
-  //if the queue is not empty, get cmd and execute it
-  if(cmdFifoQue.cmdFifoEmpty()==false){
-    Cmd cmd;
-    //Get a cmd from the cmd queue.
-    cmdFifoQue.cmdFifoGet(&cmd);
-    
-    if(!memcmp(cmd.data,GB_XIMIE,cmd.len)){
-      flag_rgb_blink=false;
-      flag_rgb_rainbow=false;
-      rgbLed.setColorRGB(0,0,0);
-    }
-    else if(!memcmp(cmd.data,GB_LANSE,cmd.len)){
-      flag_rgb_blink=false;
-      flag_rgb_rainbow=false;
-      rgbLed.setColorRGB(0,0,255);
-    }
-    else if(!memcmp(cmd.data,GB_HONGSE,cmd.len)){
-      flag_rgb_blink=false;
-      flag_rgb_rainbow=false;
-      rgbLed.setColorRGB(255,0,0);
-    }
-    else if(!memcmp(cmd.data,GB_LVSE,cmd.len)){
+     // The buffer size is now 32. So the max length of Cmd is 8 Chinese characters.
+     char buffer[CMD_GB2312_CODE_MAX_LEN];
+     unsigned long  beforRecTime =millis();
+     unsigned long  recTime = beforRecTime;
+     
+     Serial.print("all character:");
+     while(recTime - beforRecTime < CMD_REC_TIME_OUT){
+       buffer[len]=mySerial.read();
+       Serial.print(" ");
+       Serial.print(buffer[len]);
+       //if encounter '\n' or len large than max len ,break
+       if(buffer[len]=='\n' ||  len>CMD_GB2312_CODE_MAX_LEN-1){
+         break;
+       }
+       len++;
+       recTime= millis();
+     }
+     Serial.print("rec cmd: ");
+     Serial.write(buffer,len);
+     Serial.println("");
+     if(!memcmp(buffer,GB_XIMIE,8)){
+       flag_rgb_blink=false;
+       flag_rgb_rainbow=false;
+       rgbLed.setColorRGB(0,0,0);
+     }
+     else if(!memcmp(buffer,GB_LANSE,8)){
+       flag_rgb_blink=false;
+       flag_rgb_rainbow=false;
+       rgbLed.setColorRGB(0,0,255);
+     }
+     else if(!memcmp(buffer,GB_HONGSE,8)){
+       flag_rgb_blink=false;
+       flag_rgb_rainbow=false;
+       rgbLed.setColorRGB(255,0,0);
+     }
+     else if(!memcmp(buffer,GB_LVSE,8)){
       flag_rgb_blink=false;
       flag_rgb_rainbow=false;
       rgbLed.setColorRGB(0,255,0);
-    }
-    else if(!memcmp(cmd.data,GB_SHAN,cmd.len)){
+     }
+     else if(!memcmp(buffer,GB_SHAN,4)){
       flag_rgb_blink=true;
       flag_rgb_rainbow=false;
-    }
-    else if(!memcmp(cmd.data,GB_BIAN,cmd.len)){
-      flag_rgb_blink=false;
-      flag_rgb_rainbow=true;
-    }
-    else if(!memcmp(cmd.data,GB_ZHUAN,cmd.len)){
-      moto.rotate(50);
-    }
-    else if(!memcmp(cmd.data,GB_JIASU,cmd.len)){
-      moto.speedup();
-    }
-    else if(!memcmp(cmd.data,GB_JIANSU,cmd.len)){
-      moto.speedown();
-    }
-    else if(!memcmp(cmd.data,GB_TING,cmd.len)){
-      moto.stop();
-    }
-    else if(!memcmp(cmd.data,GB_WENDU,cmd.len)){
-      dht11.read();
-//      Serial.print("Temperature (oC): ");
-//      Serial.print((float)dht11.temperature, 2);
-//      Serial.print("\n");
-      mySerial.print("Temperature (oC): ");
-      mySerial.print((float)dht11.temperature, 2);
-      mySerial.print("\n");
-    }
-    else if(!memcmp(cmd.data,GB_SHIDU,cmd.len)){
-      dht11.read();
-//      Serial.print("Humidity (%): ");
-//      Serial.print((float)dht11.humidity, 2);
-//      Serial.print("\n");
-      mySerial.print("Humidity (%): ");
-      mySerial.print((float)dht11.humidity, 2);
-      mySerial.print("\n");
-    }
+     }
+     else if(!memcmp(buffer,GB_BIAN,4)){
+       flag_rgb_blink=false;
+       flag_rgb_rainbow=true;
+     }
+     else if(!memcmp(buffer,GB_ZHUAN,4)){
+       moto.rotate(50);
+     }
+     else if(!memcmp(buffer,GB_JIASU,8)){
+       moto.speedup();
+     }
+     else if(!memcmp(buffer,GB_JIANSU,8)){
+       moto.speedown();
+     }
+     else if(!memcmp(buffer,GB_TING,4)){
+       moto.stop();
+     }
+     else if(!memcmp(buffer,GB_WENDU,8)){
+       dht11.read();
+       mySerial.print("Temperature (oC): ");
+       mySerial.print((float)dht11.temperature, 2);
+       mySerial.print("\n");
+     }
+     else if(!memcmp(buffer,GB_SHIDU,8)){
+       dht11.read();
+       mySerial.print("Humidity (%): ");
+       mySerial.print((float)dht11.humidity, 2);
+       mySerial.print("\n");
+     }
     /*
     Add your own code of cmd decoding here 
     */
@@ -180,23 +173,4 @@ void loop() {
     }
   }
 }
-//hardwareSerial receive the cmd and put in queue
-/*
-void serialEvent(){
-//statements
-     int len=0;
-     char buffer[32];
-     int buffer_len=0;
-     Serial.setTimeout(200);
-     do{
-      //Read 10 bytes from Serial one time
-      len = Serial.readBytes(&buffer[buffer_len],10);
-      buffer_len += len;
-      //If there are some data more remain in the Serial, read again
-      }while(len >= 10);
-      Cmd cmd;
-      cmd.len = buffer_len;
-      memcpy(cmd.data,buffer,buffer_len);
-      //Put cmd into the cmd queue
-      cmdFifoQue.cmdFifoPut(&cmd);
-}*/
+
