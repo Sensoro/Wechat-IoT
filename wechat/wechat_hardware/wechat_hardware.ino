@@ -54,12 +54,13 @@ unsigned long previousMillis = 0;
 
 void setup() {
   //hardware Serial 
-/*
-  Serial.begin(38400);
-  while(!Serial);
-*/
+
+//  Serial.begin(38400);
+//  while(!Serial);
+
 //SoftwareSerial
   mySerial.begin(38400);
+//  Serial.println("start");
   rgbLed.begin();
   moto.begin();
 }
@@ -76,7 +77,7 @@ void loop() {
       Cmd cmd;
       cmd.len = len;
       memcpy(cmd.data,buffer,len);
-//      mySerial.write(cmd.data,cmd.len);
+//      Serial.write(cmd.data,cmd.len);
       //Put cmd into the cmd queue
       cmdFifoQue.cmdFifoPut(&cmd);
   }
