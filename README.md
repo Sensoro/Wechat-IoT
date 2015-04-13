@@ -49,14 +49,15 @@
 #####已支持的命令：
 蓝色、红色、绿色、变、闪、熄灭。     
 转、加速、减速、停。
+温度、湿度。
 
   
 ##开始动手
 ####相关资源
 开发者套件中的 智能硬件开发板 兼容 Arduino。
- * Arduino 官网 http://智能硬件开发板.cc/
- * Arduino 中文社区 http://www.智能硬件开发板.cn/
- * Arduino IDE链接 http://智能硬件开发板.cc/en/Main/Software
+ * Arduino 官网 http://arduino.cc/
+ * Arduino 中文社区 http://www.arduino.cn/
+ * Arduino IDE链接 http://arduino.cc/en/Main/Software
 
 ####如何开发
 1. 打开 IDE
