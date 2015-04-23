@@ -51,7 +51,7 @@ bool flag_rgb_rainbow=false;
 unsigned long previousMillis = 0;
 
 void setup() {
-  //hardware Serial 
+  //Hardware Serial 
   Serial.begin(38400);
   while(!Serial);
  //SoftwareSerial
@@ -86,53 +86,53 @@ void loop() {
      Serial.print("rec cmd: ");
      Serial.write(buffer,len);
      Serial.println("");
-     if(!memcmp(buffer,GB_XIMIE,8)){
+     if(!memcmp(buffer,GB_XIMIE,len)&&len==strlen(GB_XIMIE)){  
        flag_rgb_blink=false;
        flag_rgb_rainbow=false;
        rgbLed.setColorRGB(0,0,0);
      }
-     else if(!memcmp(buffer,GB_LANSE,8)){
+     else if(!memcmp(buffer,GB_LANSE,len)&&len==strlen(GB_LANSE)){
        flag_rgb_blink=false;
        flag_rgb_rainbow=false;
        rgbLed.setColorRGB(0,0,255);
      }
-     else if(!memcmp(buffer,GB_HONGSE,8)){
+     else if(!memcmp(buffer,GB_HONGSE,len)&&len==strlen(GB_HONGSE)){
        flag_rgb_blink=false;
        flag_rgb_rainbow=false;
        rgbLed.setColorRGB(255,0,0);
      }
-     else if(!memcmp(buffer,GB_LVSE,8)){
+     else if(!memcmp(buffer,GB_LVSE,len)&&len==strlen(GB_LVSE)){
       flag_rgb_blink=false;
       flag_rgb_rainbow=false;
       rgbLed.setColorRGB(0,255,0);
      }
-     else if(!memcmp(buffer,GB_SHAN,4)){
+     else if(!memcmp(buffer,GB_SHAN,len)&&len==strlen(GB_SHAN)){
       flag_rgb_blink=true;
       flag_rgb_rainbow=false;
      }
-     else if(!memcmp(buffer,GB_BIAN,4)){
+     else if(!memcmp(buffer,GB_BIAN,len)&&len==strlen(GB_BIAN)){
        flag_rgb_blink=false;
        flag_rgb_rainbow=true;
      }
-     else if(!memcmp(buffer,GB_ZHUAN,4)){
+     else if(!memcmp(buffer,GB_ZHUAN,len)&&len==strlen(GB_ZHUAN)){
        moto.rotate(50);
      }
-     else if(!memcmp(buffer,GB_JIASU,8)){
+     else if(!memcmp(buffer,GB_JIASU,len)&&len==strlen(GB_JIASU)){
        moto.speedup();
      }
-     else if(!memcmp(buffer,GB_JIANSU,8)){
+     else if(!memcmp(buffer,GB_JIANSU,len)&&len==strlen(GB_JIANSU)){
        moto.speedown();
      }
-     else if(!memcmp(buffer,GB_TING,4)){
+     else if(!memcmp(buffer,GB_TING,len)&&len==strlen(GB_TING)){
        moto.stop();
      }
-     else if(!memcmp(buffer,GB_WENDU,8)){
+     else if(!memcmp(buffer,GB_WENDU,len)&&len==strlen(GB_WENDU)){
        dht11.read();
        mySerial.print("Temperature (oC): ");
        mySerial.print((float)dht11.temperature, 2);
        mySerial.print("\n");
      }
-     else if(!memcmp(buffer,GB_SHIDU,8)){
+     else if(!memcmp(buffer,GB_SHIDU,len)&&len==strlen(GB_SHIDU)){
        dht11.read();
        mySerial.print("Humidity (%): ");
        mySerial.print((float)dht11.humidity, 2);
@@ -173,4 +173,3 @@ void loop() {
     }
   }
 }
-
