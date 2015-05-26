@@ -1,0 +1,23 @@
+{
+  "name": "scripts",
+  "version": "0.0.0",
+  "authors": [
+    "liuxiaodong <liuxiaodong1989@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vue": "~0.11.4",
+    "js-base64": "~2.1.6",
+    "async": "~0.9.2",
+    "encode-to-gb2312": "*",
+    "jquery": "~2.1.4",
+    "underscore": "~1.8.3"
+  }
+}

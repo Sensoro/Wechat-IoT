@@ -1,0 +1,466 @@
+.dis-select {
+  -webkit-user-select: none;
+}
+
+* {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+body {
+  background: #282828;
+  min-height: 615px;
+  color: white;
+}
+
+.hide {
+  display: none;
+}
+
+.opacity-hide {
+  opacity: 0;
+}
+
+.hidden {
+  visibility:hidden;
+}
+
+.device-list {
+  text-align: center;
+}
+
+.device-info {
+  position: relative;
+  background: #333333;
+  border-radius: 10px;
+  width: 90%;
+  margin: 10px auto;
+  padding: 10px 10px 15px 10px;
+}
+
+.list .header {
+  height: 50px;
+  margin-bottom: 10px;
+  border-bottom: solid #2e2e2e 1px;
+}
+
+.device-id {
+  word-wrap: break-word;
+}
+
+.line-space {
+  margin-top: 7px;
+  margin-bottom: 7px;
+  height: 1px;
+  background: #2e2e2e;
+}
+
+.info {
+  height: 25px;
+  line-height: 25px;
+  padding: 5px;
+}
+
+.info .state {
+  float: left;
+  clear: both;
+}
+
+.btns {
+  float: right;
+}
+
+.light {l
+  float: right;
+  background: #626262;
+  border-radius: 4px;
+  height: 20px;
+  padding: 5px;
+  line-height: 20px;
+  margin-left: 10px;
+  color: white;
+  font-size: 14px;
+  height: 30px;
+  border: 0;
+  min-width: 50px;
+}
+
+.light.loading{
+  color: #000;
+}
+
+.loading {
+  background: url(../images/loading.jpg) no-repeat;
+  background-position: -13px -20px;
+  background-size: 140%;
+}
+
+.img-voice {
+  background: url(../images/voice.png) no-repeat;
+  background-position: 48px 5px;
+  background-size: 31%;
+  width: 100%;
+  height: 100px;
+}
+
+.img-voice:after {
+  content: "松开手指结束";
+  top: 90px;
+  position: absolute;
+  left: 42px;
+  font-size: 14px;
+}
+
+.img-voice-nexus5 {
+  background: url(../images/voice.png) no-repeat;
+  background-position: 48px 5px;
+  background-size: 31%;
+  width: 100%;
+  height: 100px;
+}
+
+.img-voice-nexus5:after {
+  content: "再次点击结束";
+  top: 90px;
+  position: absolute;
+  left: 42px;
+  font-size: 14px;
+}
+
+.busy {
+  background: url(../images/busy.gif) no-repeat;
+  background-size: 100%;
+  width: 70px;
+  height: 70px;
+  margin: 0 auto;
+}
+
+.btn {
+  margin: 0 auto;
+  height: 40px;
+  width: 210px;
+  background: #626262;
+  line-height: 40px;
+  padding: 5px;
+  border-radius: 10px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.scan-btn {
+  width: 100px;
+  float: right;
+  margin-right: 10px;
+  line-height: 40px;
+  padding: 5px;
+  text-align: right;
+  color: white;
+}
+
+.header-left {
+  float: left;
+  width: 50px;
+  height: 50px;
+}
+
+.scan-gif {
+  background: url(../images/scan1.gif) no-repeat;
+  background-size: 100%;
+  background-position: 0px 6px;
+}
+
+.debug {
+  width: auto;
+  text-align: center;
+  line-height: 50px;
+  margin-left: 15px;
+}
+
+.debug input[type="checkbox"] {
+  border: 0;
+}
+
+.modal.shade {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  z-index: 1050;
+  overflow-y: scroll;
+  overflow-x: auto;
+  outline: 0px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  background: rgba(0,0,0,0.8);
+}
+
+.dialog-content, .modal-content{
+  width: 150px;
+  height: 110px;
+  background: rgba(0,0,0,.8);
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  left: 28%;
+  position: fixed;
+  top: 150px;
+  font-size: 20px;
+}
+
+.dialog-content .dia-body {
+  height: 100%;
+  text-align: center;
+  word-wrap: break-word;
+  overflow-y: auto;
+}
+
+.dialog-content .dia-body.img-voice {
+  line-height: 2;
+  padding-top: 0;
+}
+
+.dia-header .close, .modal-content .close {
+  float: right;
+  margin: -10px -9px 0px -17px;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  line-height: 25px;
+  cursor: pointer;
+  font-family: Lato,Calibri,Arial,sans-serif;
+}
+
+.modal-content {
+  background: #282828;
+  width: 250px;
+  height: 180px;
+  left: 16%;
+  padding: 0;
+}
+
+.modal-header {
+  padding: 10px;
+  border-bottom: solid #2e2e2e 1px;
+}
+
+.modal-footer {
+  text-align: right;
+  border-top: solid #2e2e2e 1px;
+}
+
+.modal-header h4 {
+  margin: 0;
+}
+
+.modal-header .close {
+  margin: -28px -5px 0px 0px;
+}
+
+.modal-body {
+  text-align: center;
+}
+
+.modal-body input{
+  margin: 20px 0;
+  height: 35px;
+  width: 200px;
+  border-radius: 4px;
+  font-size: 18px;
+  background: #333333;
+  color: white;
+}
+
+.modal-footer button {
+  width: 60px;
+  height: 30px;
+  border-radius: 5px;
+  margin-top: 8px;
+  background: #626262;
+  color: white;
+  font-size: 14px;
+}
+
+.current {
+  position: absolute;
+  display: block;  
+  float: left;
+  margin-top: 4px;
+  clear: both;
+  left: 35px;
+  font-size: 12px;
+  color: #A5A1A1;
+}
+
+.current:before {
+  content: '';
+  position: absolute;
+  background: #79ff79;
+  height: 15px;
+  width: 15px;
+  border-radius: 8px;
+  left: -20px;
+  top: -2px;
+}
+
+.setting {
+  position: absolute;
+  right: 10px;
+  margin-top: 0px;
+  background: url(../images/setting.png) no-repeat;
+  height: 30px;
+  width: 30px;
+  background-size: 60%;
+}
+
+.show {
+  width: 100px;
+  height: 100px;
+  background: #ededed;
+  border-radius: 50px;
+  text-align: center;
+  line-height: 6;
+  margin: 80px auto;
+  color: #000;
+}
+
+.show.loading {
+  background: #EF9393;
+}
+
+.switch {
+  background: #21bf9a;
+  color: white;
+  height: 40px;
+  line-height: 40px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.description {
+  margin-left: 20px;
+}
+
+.space {
+  height: 50px;
+}
+
+.text-input {
+  position: fixed;
+  bottom:  0px;
+  width: 100%;
+  height: 50px;
+  background-color: #282828;
+  border-top: solid #2e2e2e 1px;
+}
+
+.icon-control {
+  float: left;
+  width: 42px;
+  height: 100%;
+}
+
+.text-input .voice-icon {
+  display: block;
+  height: 25px;
+  width: 25px;
+  margin: 13px 0 0 9px;
+  background: url(../images/icon_round.png) no-repeat;
+  background-size: 290%;
+  background-position: -48px 0px;
+}
+
+.text-input .edit-icon {
+  display: block;
+  height: 25px;
+  width: 25px;
+  margin: 13px 0 0 9px;
+  background: url(../images/icon_round.png) no-repeat;
+  background-size: 290%;
+}
+
+.text-input .input-box {
+  color: white;
+  margin-top: 8px;
+  right: 61px;
+  position: absolute;
+  left: 42px;
+  padding-right: 10px;
+}
+
+.text-input .input-box input {
+  border-radius: 4px;
+  font-size: 18px;
+  background-color: #333333;
+  color: white; 
+  width: 100%;
+}
+
+.text-input .send {
+  float: right;
+  height: 100%;
+  width: 61px;
+  color: white;
+  font-size: 13px;
+  text-align: right;
+}
+
+.text-input .send button {
+  float: right;
+  margin-top: 17px;
+  display: block;
+  margin-right: 19px;
+  background: #282828;
+  padding: 0;
+  color: white;
+  font-size: 13px;
+  border: 0;
+}
+
+.text-input .voice-btn {
+  height: 31px;
+  border: solid #333333 1px;
+  margin-top: 8px;
+  line-height: 31px;
+  text-align: center;
+  font-size: 14px;
+  border-radius: 4px;
+  background: #333333;
+  color: white;
+  right: 19px;
+  position: absolute;
+  left: 42px;
+}
+
+.voice-btn.press {
+  opacity: 0.5;
+}
+
+.base-controll {
+  padding: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.base-controll:before {
+  content: '基本功能模块';
+  font-size: 12px;
+  float: left;
+  color: #A5A1A1;
+}
+
+.menu-down:before {
+  content: '▲';
+}
+
+.base-controll .fun-btns {
+  padding-top: 20px;
+  text-align: left;
+}
+
+.base-controll .light{
+  width: 50px;
+  margin-top: 10px; 
+  margin-right: 10px;
+  margin-left: 0; 
+}

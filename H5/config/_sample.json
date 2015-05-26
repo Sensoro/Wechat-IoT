@@ -1,0 +1,13 @@
+{
+  "redis": {
+    "host": "localhost",
+    "port": 6380
+  },
+
+ "weixin": {
+    "id": "your weixin id",
+    "token": "your weixin token",
+    "app_id": "your weixin app_id",
+    "app_secret": "your weixin app_secret"
+  }
+}

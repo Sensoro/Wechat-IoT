@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>IOT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <link rel="stylesheet" type="text/css" href="../style/iot.css">
+    <script src="../bower_components/vue/dist/vue.min.js"></script>
+  </head>
+  <body ontouchstart="" style="margin:0;">
+    <div class="container hidden">
+      <div class="debug"></div>
+      <div class="busy hide"></div>
+      <div class="switch dis-select" v-on="click: switchPage(deviceId)">查看说明书</div>
+      <div class="show-container hide">
+        <div class="description">
+          <p style="text-indent: 2em;">利用微信客户端，通过语音控制智能硬件设备，只需 10 分钟快速上手。通过微信扫描二维码绑定设备后，你可以在 SENSORO 公众号下的 iot 页面对设备发送命令。我们使用了微信 JSSDK 来实现语音命令解析，也可以切换为文字输入的方式；通过 SMART TAG 透明传输命令，通过开发板解析命令，通过 iot体验板 来响应命令。</p>
+          <h2>命令列表</h2>
+          <ul>
+            <li>蓝色</li>
+            <li>红色</li>
+            <li>变</li>
+            <li>转</li>
+            <li>加速</li>
+            <li>停</li>
+          </ul>
+          <p>去往 <a href="http://www.sensoro.com/zh/iot" style="color:#C7BEBE;font-size: 18px;text-decoration: none;">iot 文档详情页</a></p>
+        </div>
+      </div>
+      <div class="list">
+        <div class="header">
+          <div class="header-left scan-gif hide"></div>
+          <div class="header-left dis-select debug">
+            <label>
+              <input type="checkbox" v-model="debug_flag"></input>
+              <span>开启调试模式</span>
+            </label>
+          </div>
+          <div class="scan-btn dis-select", id="startscan", v-on="click: startScan()">开始扫描设备</div>
+          <div class="scan-btn dis-select hide", id="stopscan", v-on="click: stopScan()">停止扫描设备</div>
+        </div>
+        <div class="bind-list">
+          <div v-if="progress === 'loading'">正在加载数据...</div>
+          <div v-if="progress === 'complete' && devices.length === 0" class="no-device", style="text-align: center;">您没有绑定设备</div>
+          <div v-if="progress === 'complete' && devices.length > 0" class="device-list">
+            <div v-repeat="devices | sortList" class="device-info"  id="{{deviceId}}">
+              <div class="device-id"  v-on="click: selectDevice(deviceId)">
+                <span v-if="currentDevice === deviceId && state == 'connected'" class="current">正在控制</span>
+                <span class="alias" style="font-size: 20px;">{{deviceId | truncation}}</span>
+                <span v-if="state" class="setting" v-on="click: setting(deviceId, $event)"></span>
+              </div>
+              <div class="line-space"></div>
+              <div class="info">
+                <div class="state">
+                  <span>状态:</span>
+                  <span>{{state == 'connected' ? '已连接' : (state == 'disconnected' ? '未连接' : '未绑定')}}</span>
+                </div>
+                <div class="btns">
+                  <button v-if="state === 'disconnected'" class="dis-select light" id="connect" v-on="click: connect(deviceId, state)">连接</button>
+                  <button v-if="state === 'connected'" class="dis-select light" id="disconnect" v-on="click: disconnect(deviceId, state)">断开</button>
+                  <button v-if="state === 'connecting'" class="dis-select light loading" id="connecting">正在连接</button>
+                  <button v-if="state !== 'connected' && state !== 'disconnected' && state !== 'connecting'" class="dis-select light" id="bind" v-on="click: bind(deviceId)">绑定</button>
+                  <button v-if="state === 'connected' || state === 'disconnected'" class="dis-select light" id="unbind" v-on="click: unbind(deviceId)">解绑</button>
+                </div>
+              </div>
+              <div v-if="currentDevice === deviceId && state == 'connected'" class="base-controll" v-transition="fade">
+                <div class="fun-btns">
+                  <button class="dis-select light" v-on="click: sendText('红色')"style="clear:left;">红色</button>
+                  <button class="dis-select light" v-on="click: sendText('蓝色')">蓝色</button>
+                  <button class="dis-select light" v-on="click: sendText('闪')">闪</button>
+                  <button class="dis-select light" v-on="click: sendText('熄灭')">熄灭</button>
+                  <button class="dis-select light" v-on="click: sendText('转')">转</button>
+                  <button class="dis-select light" v-on="click: sendText('加速')">加速</button>
+                  <button class="dis-select light" v-on="click: sendText('减速')">减速</button>
+                  <button class="dis-select light" v-on="click: sendText('停')" style="clear:right;">停</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="scan-list">
+          <div v-repeat="deviceId : scanList" class="device-info">
+            <div class="device-id" style="text-align: center;">{{deviceId}}</div>
+            <hr>
+            <div class="state" id="{{deviceId}}">
+              <button class="dis-select light" id="bind" v-on="click: bind(deviceId)">绑定</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="text-input">
+          <div class="icon-control" v-on="click: switchHandle()">
+            <i class="edit-icon"></i>
+          </div>
+          <div class="input-box">
+            <input class="hide" type="text">
+          </div>
+          <div class="dis-select voice-btn start-voice">按住 说话</div>
+          <div class="dis-select send hide" v-on="click: sendText()">
+            <button>发送</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal shade hide">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4>修改名称</h4>
+            <span class="dis-select close" type="button">x</span>
+          </div>
+          <div class="modal-body">
+            <input type="text" v-model="alias">
+          </div>
+          <div class="modal-footer">
+            <button type="dis-select button" class="close-btn" style="margin-right: 10px;">取消</button>
+            <button type="dis-select button" v-on="click:submit()" style="margin-right: 15px;background: #9B9696;">确定</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog hide">
+        <div class="dialog-content" v-drag="true">
+          <div class="dia-header"><span class="dis-select close" type="button" data-disdrag="true">×<span></div>
+          <div class="dia-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/js-base64/base64.min.js"></script>
+    <script src="../bower_components/underscore/underscore-min.js"></script>
+    <script src="../bower_components/async/lib/async.js"></script>
+    <script src="../bower_components/encode-to-gb2312/encodeToGb2312.js"></script>
+    <script src="../scripts/drag.js"></script>
+    <script src="../scripts/config.js"></script>
+    <script src="../scripts/iot.js"></script>
+  </body>
+</html>
