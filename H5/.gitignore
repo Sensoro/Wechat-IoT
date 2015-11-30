@@ -7,4 +7,6 @@ redis.conf
 public/bower_components
 *.bak
 !config/_sample.json
+access_token.txt
+jsapi_ticket.txt
 *~

@@ -1,52 +1,27 @@
 var path = require('path');
 var express = require('express');
-var config = require('config');
-var ejs = require('ejs');
 var morgan = require('morgan');
-
-/**
- * 公众号基础接口库 
- */
-var wx = require("./middlewares/wx")({
-  token: config.weixin.token,
-  app_id: config.weixin.app_id,
-  app_secret: config.weixin.app_secret,
-  redis_options: {
-    host: config.redis.host,
-    port: config.redis.port
-  }
-});
-
-/**
- * 公众号蓝牙硬件接口 api 库
- */
-var wxDevice = require('weixin-device');
-for(var prot in wxDevice){
-  wx[prot] = wxDevice[prot];
-}
+var weixin = require('./util/weixin');
 
 var app = express();
-app.set('port', process.env.PORT || 5001);
+app.set('port', process.env.PORT || 3000);
 
+app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', __dirname + '/public/views');
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
-app.use(morgan('combined'));
-app.use(require('./middlewares/body')());
+app.use(require('weixin-body-parser')());
 
-app.use('/wechat', wx);
+// 微信公众号配置的URL 路由
+app.use('/wechat', weixin.trap);
 
-app.get("/", function(req, res, next){
-  res.render('index');
-});
+// H5页面需要的接口（获取签名）
+require('./route/handle')(app);
 
-require('./route/wechat')(wx);
-
-require('./route/handle')(app, wx);
-
+// H5 的demo页面
 app.get('/*', function(req, res, next){
-  res.redirect('/');
+  res.render('index');
 });
 
 app.use(function(req, res, next) {

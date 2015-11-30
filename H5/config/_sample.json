@@ -1,13 +1,10 @@
 {
-  "redis": {
-    "host": "localhost",
-    "port": 6380
-  },
-
  "weixin": {
     "id": "your weixin id",
     "token": "your weixin token",
-    "app_id": "your weixin app_id",
-    "app_secret": "your weixin app_secret"
-  }
+    "appid": "your weixin app_id",
+    "appsecret": "your weixin app_secret"
+  },
+
+  "demoUrl": "http://youdomain.com/demo" // 你自己 iot H5 页面的完整 URL 地址
 }
