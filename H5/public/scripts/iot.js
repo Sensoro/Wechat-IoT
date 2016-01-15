@@ -1,14 +1,7 @@
-;(function(window, undefined) {
-  var url = location.href.replace(location.hash, "");
-  url = encodeURIComponent(url);
-  var vm, signData, openid, voice = {
-    localId: '',
-    serverId: ''
-  }; // 语音录制内容
+(function(window, undefined) {
   var reg = /(。|，|！|：|；|？)/g; // 语音解析的正则表达式,微信解析语音后会再后面加上一个标点符号
   var mobile = (window.navigator.userAgent.toLowerCase().indexOf("android") > -1) ? 'android' : 'iphone';
   var is_nexus5 = (window.navigator.userAgent.replace(/ /g, "").toLowerCase().indexOf("nexus5") > -1);
-  var retry_count = 5;
 
   if (mobile === 'android') {
     $(".text-input .input-box").css("margin-top", "10px");
@@ -21,9 +14,17 @@
     $(".text-input .voice-btn").text("点击 说话");
   }
 
-
+  var vm, signData, openid,
+  // 语音录制内容
+  voice = {
+    localId: '',
+    serverId: ''
+  };
+  
+  // 微信 config
   var code = getQueryString('code');
-
+  var url = location.href.replace(location.hash, "");
+  url = encodeURIComponent(url);
   $.get(baseUrl + "/sign?url=" + url + "&code=" + code, function(data) {
     openid = data.openid;
     signData = {
@@ -383,22 +384,6 @@
         },
       }
     });
-
-    var _list = [{
-      deviceId: '111111',
-      state: 'connected'
-    }, {
-      deviceId: '222222',
-      state: 'disconnected'
-    }, {
-      deviceId: '333333',
-      state: 'connecting'
-    }, {
-      deviceId: '44444444444444444444444444444444444',
-      state: 'connected'
-    }];
-    //setDeviceData(_list);
-
   }
 
   // 开始录音
@@ -607,27 +592,26 @@
     });
   }
 
-  var send_flag = false;
-
-  function sendDataToWXDevice(deviceId, buf, cb) {
+  var send_flag = false; // 是否正在给某个设备发送数据
+  var retry_count_total = 5; // 重试次数
+  function sendDataToWXDevice(deviceId, buf, cb, retry_count) {
     var _data = mixin({
       "deviceId": deviceId,
       "base64Data": buf
     }, signData);
-    if (send_flag && retry_count > 0) {
-      retry_count--;
+    // 若正在给某个设备发送数据，则等待 10 ms 重试
+    if (!retry_count) retry_count = 0;
+    if (send_flag && retry_count < retry_count_total) {
       return setTimeout(function() {
-        sendDataToWXDevice(deviceId, buf, cb);
-      }, 0);
-    } else if (send_flag && retry_count <= 0) {
+        sendDataToWXDevice(deviceId, buf, cb, ++this.retry_count);
+      }.bind({retry_count: retry_count}), 10);
+    } else if (send_flag && retry_count >= retry_count_total) { // 重试 5 次后直接发送数据
       send_flag = false;
-      sendDataToWXDevice(deviceId, buf, cb);
-      retry_count = 5;
+      sendDataToWXDevice(deviceId, buf, cb, retry_count);
     }
     send_flag = true;
     WeixinJSBridge.invoke('sendDataToWXDevice', _data, function(res) {
       send_flag = false;
-      retry_count = 5;
       if (res.err_msg === 'sendDataToWXDevice:ok') return cb(null, null);
       return cb(res);
     });

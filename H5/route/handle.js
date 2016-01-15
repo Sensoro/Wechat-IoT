@@ -1,112 +1,123 @@
-var request = require('request');
 var config = require('config');
-var sign = require('../util/sign');
-var redis = require('redis');
-var _ = require('underscore');
-var db = redis.createClient(config.redis.port, config.redis.host);
+var weixin = require('../util/weixin');
 
-module.exports = function(app, wx){
+var appid = config.weixin.appid;
 
-  // 获取签名
+module.exports = function(app){
+
+  /**
+   * jssdk 签名， 供H5页面调用
+   *
+   * @param {String} url H5 当前页面的 url（去掉 hash）
+   */
+
+   // 缓存 code 对应的 openid，以免页面刷新后获取不到 openid
+  var codeMap = {};
+  var getOpenid = function(code, callback) {
+    if (codeMap[code]) {
+      return callback(null, codeMap[code]);
+    }
+    weixin.api.getOauthAccessToken(appid, code, function(err, data){
+      var openid = data && data.openid;
+      if (openid) {
+        codeMap[code] = openid;
+      }
+      return callback(err, openid);
+    });
+  };
+
   app.get('/sign', function(req, res){
     var url = req.query.url;
-    if(url) url = decodeURIComponent(url);
     var code = req.query.code;
-    var access_token = wx.access_token();
-    if(!url) return res.json(400, {errMsg: "need url"});
-    if(!access_token) return res.json(400, {errMsg:'access_token empty'});
-    getTicket(access_token, function(err, ticket){
-      if(err) return res.json(400, err);
-      var ret = sign(ticket, url);
-      ret.appid = config.weixin.app_id;
-      if(!code) return res.json(ret);
-      request.get('https://api.weixin.qq.com/sns/oauth2/access_token?appid='+config.weixin.app_id+'&secret='+config.weixin.app_secret+'&code='+code+'&grant_type=authorization_code',function(err, r, body){
-        if(body) {
-          try{
-            body = JSON.parse(body);
-          }catch(e){
-            console.log(e);
-          }
-        }
-        if(body && body.openid) ret.openid = body.openid;
+    if (!url) {
+      return res.status(400).json({errMsg: "need url"});
+    }
+    url = decodeURIComponent(url);
+    // 若有 code，说明用户是通过授权近入的页面，通过接口那个用户的 openid，页面绑定设备时需用
+    if (code) {
+      getOpenid(code, function(err, openid){
+        weixin.api.getTicketToken(function(err, token){
+          if (!token) return res.json({});
+          var ret = weixin.util.getJsConfig(token.ticket, url);
+          ret.appid = config.weixin.appid;
+          ret.openid = openid;
+          console.log('token:  ', token);
+          console.log('signData:  ', ret);
+          res.json(ret);
+        });        
+      });
+    } else {
+      weixin.api.getTicketToken(function(err, token){
+        if (!token) return res.json({});
+        var ret = weixin.util.getJsConfig(token.ticket, url);
+        ret.appid = config.weixin.appid;
+        console.log('token:  ', token);
+        console.log('signData:  ', ret);
         res.json(ret);
       });
-    });
+    }
   });
 
-  // 绑定设备
-  app.post('/bind', function(req, res){
-    var ticket = req.body.ticket;
+  /**
+    * 绑定设备
+    *
+    * @param {String} openid 微信用户的 openid
+    * @param {String} deviceid 设备 id
+    * @param {String} ticket H5 页面生成的 ticket（若没有此参数则强制绑定）
+    */
+  app.post('/bind', function (req, res) {
     var openid = req.body.openid;
     var deviceid = req.body.deviceid;
-    if(!openid) return res.status(400).json({msg: 'need openid'});
-    if(!deviceid) return res.status(400).json({msg: 'need deviceid'});
-    if(!ticket) return res.status(400).json({msg: 'need ticket'});
-    var options = {
-      access_token:wx.access_token(),
-      data: {
-        ticket: ticket,
-        device_id: deviceid,
-        openid: openid
-      }
-    };
-    wx.bind(options, function(err, ret){
-      if(err) {
-        console.log(err);
-        return res.json(400, err);
-      }
-      res.json('ok');
-    });
+    var ticket = req.body.ticket;
+    if (!openid || !deviceid) {
+      return res.status(400).json({errmsg: 'Parameter error'});
+    }
+    if (ticket) {
+      weixin.api.bindDevice(appid, deviceid, openid, ticket, function(err){
+        if (err) {
+          return res.json(400).json({errMsg: 'Bind failure', info: JSON.stringify(err)});
+        }
+        res.json('ok');
+      });
+    } else { // 强制绑定
+      weixin.api.compelBindDevice(appid, deviceid, openid, function(err){
+        if (err) {
+          return res.json(400).json({errMsg: 'Bind failure', info: JSON.stringify(err)});
+        }
+        res.json('ok');
+      });
+    }
   });
 
-  // 解绑设备
+  /**
+    * 解绑设备
+    *
+    * @param {String} openid 微信用户的 openid
+    * @param {String} deviceid 设备 id
+    * @param {String} ticket H5 页面生成的 ticket（若没有此参数则强制解绑）
+    */
   app.post('/unbind', function(req, res){
     var ticket = req.body.ticket;
     var openid = req.body.openid;
     var deviceid = req.body.deviceid;
-    var options = {
-      access_token:wx.access_token(),
-      data: {
-        ticket: ticket,
-        device_id: deviceid,
-        openid: openid
-      }
-    };
-    wx.unbind(options, function(err, ret){
-      if(err) {
-        console.log(err);
-        return res.json(400, err);
-      }
-      res.json('ok');
-    });
+    if (!openid || !deviceid) {
+      return res.status(400).json({errmsg: 'Parameter error'});
+    }
+    if (ticket) {
+      weixin.api.unbindDevice(appid, deviceid, openid, ticket, function(err){
+        if (err) {
+          return res.json(400).json({errMsg: 'Bind failure', info: JSON.stringify(err)});
+        }
+        res.json('ok');
+      });
+    } else { // 强制绑定
+      weixin.api.compelUnbindDevice(appid, deviceid, openid, function(err){
+        if (err) {
+          return res.json(400).json({errMsg: 'Bind failure', info: JSON.stringify(err)});
+        }
+        res.json('ok');
+      });
+    }      
   });
 
 };
-
-function getTicket(access_token, cb){
-  db.get("WX:jsapi:ticket", function(err, ticket){
-    if(err) return cb(err);
-    if(ticket) return cb(null, ticket);
-    request("https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + access_token + "&type=jsapi", function(err, res, body){
-      if(err) {
-        console.log(err);
-        return cb(err);
-      }
-      if(typeof body === "string"){
-        try{
-          body = JSON.parse(body);
-        }catch(e){
-          console.error("body parse error: ", e);
-        }
-      }
-      var _ticket = body.ticket;
-      var exp = Number(body.expires_in) || 7200;
-      exp = exp - 60;
-      if(!_ticket) return cb("get ticket error");
-      db.setex("WX:jsapi:ticket", exp, _ticket, function(err){
-        if(err) return cb(err);
-        return cb(null, _ticket);
-      });
-    });
-  });
-}
